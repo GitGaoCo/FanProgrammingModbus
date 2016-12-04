@@ -1,0 +1,4 @@
+TCID,Min,Max,Descript,Type,Prop,Meas,Result
+03_01_01,0,0,Ensure SPB4-J2 Ch1 is low,Test,Bool,,
+03_01_02,0,0,Ensure SPB4-J2 Ch2 is low,Test,Bool,,
+03_01_03,0,0,Ensure SPB4-J2 Ch3 is low,Test,Bool,,

@@ -1,0 +1,4 @@
+TCID,Min,Max,Descript,Type,Prop,Meas,Result
+01_01_01,-1.01,-0.99,Reading 4mA(-1.0) on SPB1-J2 Ch1,Test,Meas,,
+01_01_02,-1.01,-0.99,Reading 4mA(-1.0) on SPB1-J2 Ch2,Test,Meas,,
+01_01_03,-1.01,-0.99,Reading 4mA(-1.0) on SPB1-J2 Ch3,Test,Meas,,
