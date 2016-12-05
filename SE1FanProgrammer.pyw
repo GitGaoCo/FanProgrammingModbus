@@ -52,8 +52,10 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 ###############################################################################
 #                             Constant Data
 ###############################################################################
-
 __version__ = "x.x.x"
+
+SERNUM_PATT = re.compile('^(\\d\\d)([0-5][0-9])00([A-Z0-9]{4})')
+SERNUM_INIT_STATUS = 'Please enter valid serial number:'
 
 ###############################################################################
 #                            Function/Class Definitions
@@ -388,6 +390,13 @@ class MainWindow(QMainWindow):
         self.connect(self.TestThread,  SIGNAL("FinishPending"),  self.fnUpdateTestInformation)
         self.connect(self.TestThread,  SIGNAL("FinishPending"),  self.fnTestDone)
 
+        self.connect(self.BL601ProgEnableButton, SIGNAL("clicked()"), 
+                     lambda grpbox = self.Fan1GroupBox : self.fnCheckSerialNumber(grpbox))
+        self.connect(self.BL602ProgEnableButton, SIGNAL("clicked()"),
+                     lambda grpbox = self.Fan2GroupBox : self.fnCheckSerialNumber(grpbox))
+        self.connect(self.BL603ProgEnableButton, SIGNAL("clicked()"),
+                     lambda grpbox = self.Fan3GroupBox : self.fnCheckSerialNumber(grpbox))
+
         self.connect(self.AbortButton, SIGNAL("clicked()"), self.TestThread.fnSetAbortFlag)
                 
         #Setup the Settings so it saves and restores last settings
@@ -401,6 +410,51 @@ class MainWindow(QMainWindow):
         
         self.restoreState(self.settings.value("MainWindow/State").toByteArray())
 
+    def fnCheckSerialNumber(self, grpbox):
+        if grpbox.buttonref.isChecked():
+            print 'pressed'
+            entered_sn =  str(grpbox.lineref.text())
+            
+            matchObj = SERNUM_PATT.match(entered_sn)
+            
+            if matchObj:
+                year_dec   = matchObj.group(1)
+                year_full  = '20' + year_dec
+                mth_dec    = matchObj.group(2)
+                seq_ascii  = matchObj.group(3)
+                
+                year_hex =  format(int(year_dec), 'x').zfill(2).upper()
+                mth_hex  = format(int(mth_dec), 'x').zfill(2).upper()
+                seq_hex1 = format(ord(seq_ascii[0:1]), 'x').zfill(2).upper()
+                seq_hex2 = format(ord(seq_ascii[1:2]), 'x').zfill(2).upper()
+                seq_hex3 = format(ord(seq_ascii[2:3]), 'x').zfill(2).upper()
+                seq_hex4 = format(ord(seq_ascii[3:4]), 'x').zfill(2).upper()   
+                
+                print "{} {} {} {} {} {}".format(year_hex, 
+                                                mth_hex, 
+                                                seq_hex1, 
+                                                seq_hex2, 
+                                                seq_hex3, 
+                                                seq_hex4)
+                
+                grpbox.lineref.setEnabled(False)
+                grpbox.setTitle(grpbox.prefix + 
+                                "Year Code:"  +
+                                year_full     +
+                                "   Week Code:"  +
+                                mth_dec       +
+                                "   Seq Num:"    +
+                                seq_ascii)
+                                
+            else:
+                #did not match regex, bring button back up
+                grpbox.buttonref.setChecked(False)
+                grpbox.setTitle(grpbox.prefix + SERNUM_INIT_STATUS)
+            
+        else:
+            grpbox.lineref.setEnabled(True)
+            grpbox.setTitle(grpbox.prefix + SERNUM_INIT_STATUS)
+            
     def fnSaveLog(self):
         default_fileName = time.strftime("%Y%m%d-%H%M%S") + '.log'
         
@@ -429,12 +483,10 @@ class MainWindow(QMainWindow):
             #    print 'Choose a different file name'
             self.TestThread.testcontroller.fnWriteToCsv(fileName)    
                 
-
     def fnOpenCOMCfgDialog(self):
         #Create COMCfgDialog
         self.commcfgdialog = COMCfgDialog()       
         self.commcfgdialog.exec_() 
-
         
     def fnRunScript(self):
         self.PassFailLabel.setText("")
@@ -472,15 +524,15 @@ class MainWindow(QMainWindow):
         #Update Status Message
         if TestStatus:
             if TestStatus == SE1FanProgrammerTest.STATUS_STARTING_TEST:
-                self.PassFailLabel.setText("<h1>Starting up the tests...</h1>")
+                self.PassFailLabel.setText("<h1>Starting up the program...</h1>")
             elif TestStatus == SE1FanProgrammerTest.STATUS_FAN1_RUNNING:
-                self.PassFailLabel.setText("<h1>Testing FAN1...</h1>")
+                self.PassFailLabel.setText("<h1>Programming FAN1...</h1>")
             elif TestStatus == SE1FanProgrammerTest.STATUS_FAN2_RUNNING:
-                self.PassFailLabel.setText("<h1>Testing FAN2...</h1>")
+                self.PassFailLabel.setText("<h1>Programming FAN2...</h1>")
             elif TestStatus == SE1FanProgrammerTest.STATUS_FAN3_RUNNING:
-                self.PassFailLabel.setText("<h1>Testing FAN3...</h1>")
+                self.PassFailLabel.setText("<h1>Programming FAN3...</h1>")
             elif TestStatus == SE1FanProgrammerTest.STATUS_ABORTING_TEST:
-                self.PassFailLabel.setText("<h1>Aborting Pending... Finishing this module...</h1>")  
+                self.PassFailLabel.setText("<h1>Aborting Pending... Finishing this fan...</h1>")  
                                  
     def fnTestDone(self):
         time.sleep(2.0)
@@ -555,9 +607,7 @@ class MainWindow(QMainWindow):
         self.TestControlsGroupBox = QGroupBox("Test Controls")
         self.TestControlsGroupBox.setLayout(self.TestConstrolsGridLayout)
 
-    def fnDrawFan1Widgets(self): 
-        self.BL601SerialText = QLabel(u"Serial Number:")
-
+    def fnDrawFan1Widgets(self):
         self.BL601LineEdit = QLineEdit()
         self.BL601LineEdit.setFixedWidth(200)
                 
@@ -565,18 +615,21 @@ class MainWindow(QMainWindow):
         self.BL601ProgEnableButton.setFixedWidth(200)
         self.BL601ProgEnableButton.setCheckable(True)
 
+        self.BL601StatusLabel = QLabel()
+
         self.Fan1HLayout = QHBoxLayout()
-        self.Fan1HLayout.addWidget(self.BL601SerialText)
         self.Fan1HLayout.addWidget(self.BL601LineEdit)
         self.Fan1HLayout.addStretch()
         self.Fan1HLayout.addWidget(self.BL601ProgEnableButton)
-
-        self.Fan1GroupBox = QGroupBox("BL601 (Internal Fan)")
-        self.Fan1GroupBox.setLayout( self.Fan1HLayout )
-         
-    def fnDrawFan2Widgets(self): 
         
-        self.BL602SerialText = QLabel(u"Serial Number:")
+        self.Fan1GroupBox = QGroupBox()
+        self.Fan1GroupBox.prefix = "(BL601) "
+        self.Fan1GroupBox.setTitle(self.Fan1GroupBox.prefix + SERNUM_INIT_STATUS)
+        self.Fan1GroupBox.setLayout( self.Fan1HLayout )
+        self.Fan1GroupBox.buttonref = self.BL601ProgEnableButton
+        self.Fan1GroupBox.lineref   = self.BL601LineEdit
+                 
+    def fnDrawFan2Widgets(self): 
         
         self.BL602LineEdit = QLineEdit()
         self.BL602LineEdit.setFixedWidth(200)
@@ -586,32 +639,38 @@ class MainWindow(QMainWindow):
         self.BL602ProgEnableButton.setCheckable(True)
         
         self.Fan2HLayout = QHBoxLayout()
-        self.Fan2HLayout.addWidget(self.BL602SerialText)
         self.Fan2HLayout.addWidget(self.BL602LineEdit)
         self.Fan2HLayout.addStretch()
         self.Fan2HLayout.addWidget(self.BL602ProgEnableButton)
-        
-        self.Fan2GroupBox = QGroupBox("BL602 (External Top Fan)")
+
+        self.Fan2GroupBox = QGroupBox()
+        self.Fan2GroupBox.prefix = "(BL602) "
+        self.Fan2GroupBox.setTitle(self.Fan2GroupBox.prefix + SERNUM_INIT_STATUS)
         self.Fan2GroupBox.setLayout( self.Fan2HLayout ) 
+        self.Fan2GroupBox.buttonref = self.BL602ProgEnableButton
+        self.Fan2GroupBox.lineref   = self.BL602LineEdit
 
     def fnDrawFan3Widgets(self): 
-        self.BL603SerialText = QLabel(u"Serial Number:")
-
         self.BL603LineEdit = QLineEdit()
         self.BL603LineEdit.setFixedWidth(200)
         
-        self.BL603ProgEnableButton = QPushButton("Program External Bottom")
+        self.BL603ProgEnableButton = QPushButton("Program External Bottom Fan")
         self.BL603ProgEnableButton.setFixedWidth(200)
         self.BL603ProgEnableButton.setCheckable(True)
         
         self.Fan3HLayout = QHBoxLayout()
-        self.Fan3HLayout.addWidget(self.BL603SerialText)
         self.Fan3HLayout.addWidget(self.BL603LineEdit)
         self.Fan3HLayout.addStretch()
         self.Fan3HLayout.addWidget(self.BL603ProgEnableButton)
 
-        self.Fan3GroupBox = QGroupBox("BL603 (External Bottom Fan)")
-        self.Fan3GroupBox.setLayout( self.Fan3HLayout ) 
+        
+        self.Fan3GroupBox = QGroupBox()
+        self.Fan3GroupBox.prefix = "(BL603) "
+        self.Fan3GroupBox.setTitle(self.Fan3GroupBox.prefix + SERNUM_INIT_STATUS)
+        self.Fan3GroupBox.setLayout( self.Fan3HLayout )
+        
+        self.Fan3GroupBox.buttonref = self.BL603ProgEnableButton
+        self.Fan3GroupBox.lineref   = self.BL603LineEdit
 
     ###########################################################################
     #        Logging Related Class Methods
