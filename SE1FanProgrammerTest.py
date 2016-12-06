@@ -389,7 +389,10 @@ class TestScript(QThread):
             self.TestLogger.info("   Programming and Testing Fan 1        ")
             self.TestLogger.info("****************************************")
             self.enumTestStatus = STATUS_FAN1_RUNNING
-
+            
+            self.testcontroller.fnRecordMeasurement('BL601_0',
+                                                    self.dictTestSelection['dictSerFan1']['serialnum'])
+            
             dictFanInfo = {}
             dictFanInfo['address16']  = FAN1_ADDRESS_16
             dictFanInfo['address8']   = FAN1_ADDRESS_8
@@ -410,6 +413,9 @@ class TestScript(QThread):
             self.TestLogger.info("****************************************")
             self.enumTestStatus = STATUS_FAN2_RUNNING
 
+            self.testcontroller.fnRecordMeasurement('BL602_0',
+                                                    self.dictTestSelection['dictSerFan2']['serialnum'])
+
             dictFanInfo = {}
             dictFanInfo['address16']  = FAN2_ADDRESS_16
             dictFanInfo['address8']   = FAN2_ADDRESS_8
@@ -429,6 +435,9 @@ class TestScript(QThread):
             self.TestLogger.info("   Programming and Testing Fan 3        ")
             self.TestLogger.info("****************************************")
             self.enumTestStatus = STATUS_FAN3_RUNNING
+
+            self.testcontroller.fnRecordMeasurement('BL603_0',
+                                                    self.dictTestSelection['dictSerFan3']['serialnum'])
 
             dictFanInfo = {}
             dictFanInfo['address16']  = FAN3_ADDRESS_16

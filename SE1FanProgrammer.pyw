@@ -342,7 +342,7 @@ class MainWindow(QMainWindow):
         
         #Draw the widgets....
         self.fnDrawTestControlsWidgets()
-
+        self.fnDrawUUTSerWidgets()
         self.fnDrawFan1Widgets()
         self.fnDrawFan2Widgets()
         self.fnDrawFan3Widgets()        
@@ -353,6 +353,7 @@ class MainWindow(QMainWindow):
         # Main layout
         layout = QVBoxLayout()        
         layout.addWidget(self.TestControlsGroupBox)
+        layout.addWidget(self.UUTSerGroupBox)
         layout.addWidget(self.Fan1GroupBox)
         layout.addWidget(self.Fan2GroupBox)
         layout.addWidget(self.Fan3GroupBox)
@@ -425,6 +426,7 @@ class MainWindow(QMainWindow):
         self.Fan3GroupBox.setTitle(self.Fan3GroupBox.prefix + SERNUM_INIT_STATUS)
         self.TableWidget.fnResetforNewTest()
         self.PassFailLabel.setText("")
+        self.UUTSerLineEdit("")
         self.fnClearLogger()
         
     def fnCheckSerialNumber(self, grpbox):
@@ -446,14 +448,14 @@ class MainWindow(QMainWindow):
                 seq_ascii  = matchObj.group(3)
                 
                 dictseradd = {}
-                
-                dictseradd['year_hex'] = format(int(year_dec), 'x').zfill(2).upper()
-                dictseradd['mth_hex']  = format(int(mth_dec), 'x').zfill(2).upper()
-                dictseradd['seq_hex1'] = format(ord(seq_ascii[0:1]), 'x').zfill(2).upper()
-                dictseradd['seq_hex2'] = format(ord(seq_ascii[1:2]), 'x').zfill(2).upper()
-                dictseradd['seq_hex3'] = format(ord(seq_ascii[2:3]), 'x').zfill(2).upper()
-                dictseradd['seq_hex4'] = format(ord(seq_ascii[3:4]), 'x').zfill(2).upper()   
-                dictseradd['full_add'] = "{} {} {} {} {} {}".format(dictseradd['year_hex'], 
+                dictseradd['serialnum'] = matchObj.group(0)
+                dictseradd['year_hex']  = format(int(year_dec), 'x').zfill(2).upper()
+                dictseradd['mth_hex']   = format(int(mth_dec), 'x').zfill(2).upper()
+                dictseradd['seq_hex1']  = format(ord(seq_ascii[0:1]), 'x').zfill(2).upper()
+                dictseradd['seq_hex2']  = format(ord(seq_ascii[1:2]), 'x').zfill(2).upper()
+                dictseradd['seq_hex3']  = format(ord(seq_ascii[2:3]), 'x').zfill(2).upper()
+                dictseradd['seq_hex4']  = format(ord(seq_ascii[3:4]), 'x').zfill(2).upper()   
+                dictseradd['full_add']  = "{} {} {} {} {} {}".format(dictseradd['year_hex'], 
                                                                     dictseradd['mth_hex'], 
                                                                     dictseradd['seq_hex1'], 
                                                                     dictseradd['seq_hex2'], 
@@ -495,7 +497,12 @@ class MainWindow(QMainWindow):
 
     def fnSaveTableCsv(self):
         
-        default_fileName = time.strftime("%Y%m%d-%H%M%S") + '.csv'
+        if len(self.UUTSerLineEdit.text()) == 0:
+            default_fileName = time.strftime("%Y%m%d-%H%M%S") + '.csv'
+        else:
+            default_fileName = self.UUTSerLineEdit.text() + '.csv'
+        
+        
         
         fileName = QFileDialog.getSaveFileName(self, 'Save Results Table to...', 
                                                      './TestResults/{}'.format(default_fileName), 
@@ -527,12 +534,16 @@ class MainWindow(QMainWindow):
     def fnGetTestSelection(self):
         #TestSelectionButtonsStruct
         dictTestSelection = {}
+        
         dictTestSelection['boolRunFan1'] = self.BL601ProgEnableButton.isChecked()
         dictTestSelection['dictSerFan1'] = self.Fan1GroupBox.dictadd
+        
         dictTestSelection['boolRunFan2'] = self.BL602ProgEnableButton.isChecked()
         dictTestSelection['dictSerFan2'] = self.Fan2GroupBox.dictadd
+        
         dictTestSelection['boolRunFan3'] = self.BL603ProgEnableButton.isChecked()
         dictTestSelection['dictSerFan3'] = self.Fan3GroupBox.dictadd
+        
         return dictTestSelection
     
     def fnUpdateTestInformation(self):
@@ -645,6 +656,17 @@ class MainWindow(QMainWindow):
         self.TestControlsGroupBox = QGroupBox("Test Controls")
         self.TestControlsGroupBox.setLayout(self.TestConstrolsGridLayout)
 
+    def fnDrawUUTSerWidgets(self):
+        self.UUTSerLineEdit = QLineEdit()
+        self.UUTSerLineEdit.setFixedWidth(200)
+
+        self.UUTSerHLayout = QHBoxLayout()
+        
+        self.UUTSerHLayout.addWidget(self.UUTSerLineEdit)
+        self.UUTSerHLayout.addStretch()        
+        self.UUTSerGroupBox = QGroupBox("UUT Serial Number:")
+        self.UUTSerGroupBox.setLayout( self.UUTSerHLayout )
+
     def fnDrawFan1Widgets(self):
         self.BL601LineEdit = QLineEdit()
         self.BL601LineEdit.setFixedWidth(200)
@@ -715,6 +737,7 @@ class MainWindow(QMainWindow):
     ###########################################################################
     #        Logging Related Class Methods
     ###########################################################################
+    
     def fnAppend(self, message):
         """Used to append stuff to the Text Edit Box in the Log Window"""
         cursor = self.textDisplayArea.textCursor()
