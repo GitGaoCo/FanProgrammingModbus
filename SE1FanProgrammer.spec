@@ -15,9 +15,9 @@ a = Analysis(['SE1FanProgrammer.pyw'],
              win_private_assemblies=False,
              cipher=block_cipher)
 
-a.datas += [('Fan3_Tests.csv', 'Fan3_Tests.csv', 'DATA'),
-            ('Fan2_Tests.csv', 'Fan2_Tests.csv', 'DATA'),
-            ('Fan1_Tests.csv', 'Fan1_Tests.csv', 'DATA')]
+a.datas += [('Fan3Tests.csv', 'Fan3Tests.csv', 'DATA'),
+            ('Fan2Tests.csv', 'Fan2Tests.csv', 'DATA'),
+            ('Fan1Tests.csv', 'Fan1Tests.csv', 'DATA')]
 
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
@@ -28,7 +28,7 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=False,
-          console=True , icon='.\\images\\fan.ico')
+          console=False , icon='.\\images\\fan.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
