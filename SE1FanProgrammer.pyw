@@ -291,7 +291,6 @@ class MainWindow(QMainWindow):
         
         self.logger = logger
         
-               
         #Setup the Window Title
         self.setWindowTitle("SE1 Fan Programmer")
 
@@ -342,7 +341,6 @@ class MainWindow(QMainWindow):
         self.addActions(fileMenu,  (toggleLogWindowAction, saveLogAction, saveTableAction, quitAction, None))
         
         #Draw the widgets....
-
         self.fnDrawTestControlsWidgets()
 
         self.fnDrawFan1Widgets()
@@ -390,6 +388,8 @@ class MainWindow(QMainWindow):
         self.connect(self.TestThread,  SIGNAL("FinishPending"),  self.fnUpdateTestInformation)
         self.connect(self.TestThread,  SIGNAL("FinishPending"),  self.fnTestDone)
 
+        self.connect(self.ClearButton, SIGNAL("clicked()"), self.fnClearForm) 
+
         self.connect(self.BL601ProgEnableButton, SIGNAL("clicked()"), 
                      lambda grpbox = self.Fan1GroupBox : self.fnCheckSerialNumber(grpbox))
         self.connect(self.BL602ProgEnableButton, SIGNAL("clicked()"),
@@ -410,10 +410,32 @@ class MainWindow(QMainWindow):
         
         self.restoreState(self.settings.value("MainWindow/State").toByteArray())
 
+    def fnClearForm(self):
+        self.BL601LineEdit.setText("")
+        self.BL602LineEdit.setText("")
+        self.BL603LineEdit.setText("")
+        self.BL601LineEdit.setEnabled(True)
+        self.BL602LineEdit.setEnabled(True)
+        self.BL603LineEdit.setEnabled(True)       
+        self.BL601ProgEnableButton.setChecked(False)
+        self.BL602ProgEnableButton.setChecked(False)
+        self.BL603ProgEnableButton.setChecked(False)
+        self.Fan1GroupBox.setTitle(self.Fan1GroupBox.prefix + SERNUM_INIT_STATUS)
+        self.Fan2GroupBox.setTitle(self.Fan2GroupBox.prefix + SERNUM_INIT_STATUS)
+        self.Fan3GroupBox.setTitle(self.Fan3GroupBox.prefix + SERNUM_INIT_STATUS)
+        self.TableWidget.fnResetforNewTest()
+        self.PassFailLabel.setText("")
+        self.fnClearLogger()
+        
     def fnCheckSerialNumber(self, grpbox):
         if grpbox.buttonref.isChecked():
-            print 'pressed'
+            #print 'pressed'
             entered_sn =  str(grpbox.lineref.text())
+            
+            #Barcode scanned
+            if len(entered_sn) > 20:
+                entered_sn = entered_sn[9:]
+                #print entered_sn
             
             matchObj = SERNUM_PATT.match(entered_sn)
             
@@ -423,20 +445,21 @@ class MainWindow(QMainWindow):
                 mth_dec    = matchObj.group(2)
                 seq_ascii  = matchObj.group(3)
                 
-                year_hex =  format(int(year_dec), 'x').zfill(2).upper()
-                mth_hex  = format(int(mth_dec), 'x').zfill(2).upper()
-                seq_hex1 = format(ord(seq_ascii[0:1]), 'x').zfill(2).upper()
-                seq_hex2 = format(ord(seq_ascii[1:2]), 'x').zfill(2).upper()
-                seq_hex3 = format(ord(seq_ascii[2:3]), 'x').zfill(2).upper()
-                seq_hex4 = format(ord(seq_ascii[3:4]), 'x').zfill(2).upper()   
+                dictseradd = {}
                 
-                print "{} {} {} {} {} {}".format(year_hex, 
-                                                mth_hex, 
-                                                seq_hex1, 
-                                                seq_hex2, 
-                                                seq_hex3, 
-                                                seq_hex4)
-                
+                dictseradd['year_hex'] = format(int(year_dec), 'x').zfill(2).upper()
+                dictseradd['mth_hex']  = format(int(mth_dec), 'x').zfill(2).upper()
+                dictseradd['seq_hex1'] = format(ord(seq_ascii[0:1]), 'x').zfill(2).upper()
+                dictseradd['seq_hex2'] = format(ord(seq_ascii[1:2]), 'x').zfill(2).upper()
+                dictseradd['seq_hex3'] = format(ord(seq_ascii[2:3]), 'x').zfill(2).upper()
+                dictseradd['seq_hex4'] = format(ord(seq_ascii[3:4]), 'x').zfill(2).upper()   
+                dictseradd['full_add'] = "{} {} {} {} {} {}".format(dictseradd['year_hex'], 
+                                                                    dictseradd['mth_hex'], 
+                                                                    dictseradd['seq_hex1'], 
+                                                                    dictseradd['seq_hex2'], 
+                                                                    dictseradd['seq_hex3'], 
+                                                                    dictseradd['seq_hex4'])
+ 
                 grpbox.lineref.setEnabled(False)
                 grpbox.setTitle(grpbox.prefix + 
                                 "Year Code:"  +
@@ -445,13 +468,16 @@ class MainWindow(QMainWindow):
                                 mth_dec       +
                                 "   Seq Num:"    +
                                 seq_ascii)
+                
+                grpbox.dictadd = dictseradd
                                 
             else:
-                #did not match regex, bring button back up
+                #did not match reg-ex, bring button back up
                 grpbox.buttonref.setChecked(False)
                 grpbox.setTitle(grpbox.prefix + SERNUM_INIT_STATUS)
             
         else:
+            #Button got un-pressed, re-enable the line input box
             grpbox.lineref.setEnabled(True)
             grpbox.setTitle(grpbox.prefix + SERNUM_INIT_STATUS)
             
@@ -493,6 +519,7 @@ class MainWindow(QMainWindow):
         self.TableWidget.fnResetforNewTest()
         self.textDisplayArea.clear()
         self.StartButton.setEnabled(False)
+        self.ClearButton.setEnabled(False)
         self.AbortButton.setEnabled(True)
         self.TestThread.dictTestSelection = self.fnGetTestSelection()
         self.TestThread.start()
@@ -501,8 +528,11 @@ class MainWindow(QMainWindow):
         #TestSelectionButtonsStruct
         dictTestSelection = {}
         dictTestSelection['boolRunFan1'] = self.BL601ProgEnableButton.isChecked()
+        dictTestSelection['dictSerFan1'] = self.Fan1GroupBox.dictadd
         dictTestSelection['boolRunFan2'] = self.BL602ProgEnableButton.isChecked()
+        dictTestSelection['dictSerFan2'] = self.Fan2GroupBox.dictadd
         dictTestSelection['boolRunFan3'] = self.BL603ProgEnableButton.isChecked()
+        dictTestSelection['dictSerFan3'] = self.Fan3GroupBox.dictadd
         return dictTestSelection
     
     def fnUpdateTestInformation(self):
@@ -535,8 +565,9 @@ class MainWindow(QMainWindow):
                 self.PassFailLabel.setText("<h1>Aborting Pending... Finishing this fan...</h1>")  
                                  
     def fnTestDone(self):
-        time.sleep(2.0)
+        time.sleep(0.5)
         self.StartButton.setEnabled(True)
+        self.ClearButton.setEnabled(True)
         self.AbortButton.setEnabled(False)
         self.TableWidget.fnRefreshTable()
         
@@ -582,21 +613,28 @@ class MainWindow(QMainWindow):
         ButtonText = QString(u"Start")
         self.StartButton = QPushButton(ButtonText)
         newfont = QFont()
-        newfont.setPointSize(20)
+        newfont.setPointSize(15)
         self.StartButton.setFont(newfont)
 
         #Abort Button
         ButtonText = QString(u"Abort")
         self.AbortButton = QPushButton(ButtonText)
         newfont = QFont()
-        newfont.setPointSize(20)
+        newfont.setPointSize(15)
         self.AbortButton.setFont(newfont)
         self.AbortButton.setEnabled(False)
+
+        #Clear Buttons
+        ButtonText = QString(u"Clear")
+        self.ClearButton = QPushButton(ButtonText)
+        newfont = QFont()
+        newfont.setPointSize(15)
+        self.ClearButton.setFont(newfont)
 
         self.TestConstrolsPositionList = [
         {'x':0,'y':0,'widget':self.TestResultLabel},{'x':0,'y':1,'widget': None},
         {'x':1,'y':0,'widget':self.PassFailLabel }, {'x':1,'y':1,'widget': None},
-        {'x':2,'y':0,'widget':self.StartButton},    {'x':2,'y':1,'widget':self.AbortButton }]
+        {'x':2,'y':0,'widget':self.StartButton},    {'x':2,'y':1,'widget':self.AbortButton }, {'x':2,'y':2,'widget':self.ClearButton }]
 
         self.TestConstrolsGridLayout = QGridLayout()
         
@@ -628,6 +666,7 @@ class MainWindow(QMainWindow):
         self.Fan1GroupBox.setLayout( self.Fan1HLayout )
         self.Fan1GroupBox.buttonref = self.BL601ProgEnableButton
         self.Fan1GroupBox.lineref   = self.BL601LineEdit
+        self.Fan1GroupBox.dictadd   = {}
                  
     def fnDrawFan2Widgets(self): 
         
@@ -649,6 +688,7 @@ class MainWindow(QMainWindow):
         self.Fan2GroupBox.setLayout( self.Fan2HLayout ) 
         self.Fan2GroupBox.buttonref = self.BL602ProgEnableButton
         self.Fan2GroupBox.lineref   = self.BL602LineEdit
+        self.Fan2GroupBox.dictadd   = {}
 
     def fnDrawFan3Widgets(self): 
         self.BL603LineEdit = QLineEdit()
@@ -663,7 +703,6 @@ class MainWindow(QMainWindow):
         self.Fan3HLayout.addStretch()
         self.Fan3HLayout.addWidget(self.BL603ProgEnableButton)
 
-        
         self.Fan3GroupBox = QGroupBox()
         self.Fan3GroupBox.prefix = "(BL603) "
         self.Fan3GroupBox.setTitle(self.Fan3GroupBox.prefix + SERNUM_INIT_STATUS)
@@ -671,6 +710,7 @@ class MainWindow(QMainWindow):
         
         self.Fan3GroupBox.buttonref = self.BL603ProgEnableButton
         self.Fan3GroupBox.lineref   = self.BL603LineEdit
+        self.Fan3GroupBox.dictadd   = {}
 
     ###########################################################################
     #        Logging Related Class Methods

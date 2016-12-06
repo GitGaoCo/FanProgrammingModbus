@@ -1,5 +1,7 @@
 TCID,Min,Max,Descript,Type,Prop,Meas,Result
-02_01_01,0,0,Ensure SPB3-J2 DO_126 is low,Test,Bool,,
-02_01_02,0,0,Ensure SPB3-J2 DO_127 is low,Test,Bool,,
-02_01_03,1,1,Ensure SPB3-J2 DO_126 is high,Test,Bool,,
-
+BL602_1,1,1,Set address to 12,Test,Bool,,
+BL602_2,1,1,Apply new configurations,Test,Bool,,
+BL602_3,1,1,Set to 485 control,Test,Bool,,
+BL602_4,1,1,Set speed control to closed loop,Test,Bool,,
+BL602_5,1,1,Apply new configurations,Test,Bool,,
+BL602_6,1,1,Confirm speed control set to closed loop,Test,Bool,,

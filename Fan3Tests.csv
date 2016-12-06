@@ -1,4 +1,7 @@
 TCID,Min,Max,Descript,Type,Prop,Meas,Result
-03_01_01,0,0,Ensure SPB4-J2 Ch1 is low,Test,Bool,,
-03_01_02,0,0,Ensure SPB4-J2 Ch2 is low,Test,Bool,,
-03_01_03,0,0,Ensure SPB4-J2 Ch3 is low,Test,Bool,,
+BL603_1,1,1,Set address to 13,Test,Bool,,
+BL603_2,1,1,Apply new configurations,Test,Bool,,
+BL603_3,1,1,Set to 485 control,Test,Bool,,
+BL603_4,1,1,Set speed control to closed loop,Test,Bool,,
+BL603_5,1,1,Apply new configurations,Test,Bool,,
+BL603_6,1,1,Confirm speed control set to closed loop,Test,Bool,,

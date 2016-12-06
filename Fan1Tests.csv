@@ -1,4 +1,7 @@
 TCID,Min,Max,Descript,Type,Prop,Meas,Result
-01_01_01,-1.01,-0.99,Reading 4mA(-1.0) on SPB1-J2 Ch1,Test,Meas,,
-01_01_02,-1.01,-0.99,Reading 4mA(-1.0) on SPB1-J2 Ch2,Test,Meas,,
-01_01_03,-1.01,-0.99,Reading 4mA(-1.0) on SPB1-J2 Ch3,Test,Meas,,
+BL601_1,1,1,Set address to 11,Test,Bool,,
+BL601_2,1,1,Apply new configurations,Test,Bool,,
+BL601_3,1,1,Set to 485 control,Test,Bool,,
+BL601_4,1,1,Set speed control to closed loop,Test,Bool,,
+BL601_5,1,1,Apply new configurations,Test,Bool,,
+BL601_6,1,1,Confirm speed control set to closed loop,Test,Bool,,
