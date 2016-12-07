@@ -9,6 +9,7 @@ import TestControl
 from itertools import izip_longest
 import binascii
 import serial
+import re
 ################################################################################
 #                             Constant Data
 ################################################################################
@@ -139,7 +140,19 @@ class clSE1FanConnection(serial.Serial):
         
         time.sleep(0.1)
         reply = self.read(100)
-        return binascii.hexlify(reply)
+        
+        hex_reply = binascii.hexlify(reply).upper()
+        
+        #On the B&B electronics devices, we noticed that there is a zero byte
+        #before and after.  We need to strip it out...
+        
+        ZEROS_PATT = re.compile("^(00)([0-9a-fA-F]*)(00)$")
+        
+        matchObj = ZEROS_PATT.match(hex_reply)
+        if matchObj:
+            hex_reply = matchObj.group(2)
+    
+        return hex_reply
     
 class TestScript(QThread):
 
@@ -261,12 +274,14 @@ class TestScript(QThread):
         #In Modbus... the LSB is sent first 
         sendmsg = msg + ' ' + lst_hexstr_crc16[1] + lst_hexstr_crc16[0]
         
+        sendmsg = sendmsg.replace(" ", "")
+        
         self.TestLogger.info("Sending command:" + sendmsg)
-
+        
         reply = self.sercon.fnSendandCheck(sendmsg)
-        self.TestLogger.info("Received the following:")
-        self.TestLogger.info(reply)       
-        self.testcontroller.fnTestBool(dictFanInfo['testcase'][0], len(reply) > 0)
+        self.TestLogger.info("Received the following:{}".format(reply))
+      
+        self.testcontroller.fnTestBool(dictFanInfo['testcase'][0], len(reply) == len(sendmsg))
         
         time.sleep(1)
         ###############
@@ -279,13 +294,12 @@ class TestScript(QThread):
         lst_hexstr_crc16 = self.fnGetModbudCRC(msg)
         #In Modbus... the LSB is sent first 
         sendmsg = msg + ' ' + lst_hexstr_crc16[1] + lst_hexstr_crc16[0]
-        
+        sendmsg = sendmsg.replace(" ", "")        
         self.TestLogger.info("Sending command:" + sendmsg)
         
         reply = self.sercon.fnSendandCheck(sendmsg)
-        self.TestLogger.info("Received the following:")
-        self.TestLogger.info(reply)
-        self.testcontroller.fnTestBool(dictFanInfo['testcase'][1], len(reply) > 0)        
+        self.TestLogger.info("Received the following:{}".format(reply))
+        self.testcontroller.fnTestBool(dictFanInfo['testcase'][1], len(reply) == len(sendmsg))        
         
         time.sleep(1)
         ################
@@ -298,13 +312,12 @@ class TestScript(QThread):
         lst_hexstr_crc16 = self.fnGetModbudCRC(msg)
         #In Modbus... the LSB is sent first 
         sendmsg = msg + ' ' + lst_hexstr_crc16[1] + lst_hexstr_crc16[0]
-        
+        sendmsg = sendmsg.replace(" ", "")        
         self.TestLogger.info("Sending command:" + sendmsg)
 
         reply = self.sercon.fnSendandCheck(sendmsg)
-        self.TestLogger.info("Received the following:")
-        self.TestLogger.info(reply)
-        self.testcontroller.fnTestBool(dictFanInfo['testcase'][2], len(reply) > 0) 
+        self.TestLogger.info("Received the following:{}".format(reply))
+        self.testcontroller.fnTestBool(dictFanInfo['testcase'][2], len(reply) == len(sendmsg)) 
         
         time.sleep(1)
         ################
@@ -317,13 +330,12 @@ class TestScript(QThread):
         lst_hexstr_crc16 = self.fnGetModbudCRC(msg)
         #In Modbus... the LSB is sent first 
         sendmsg = msg + ' ' + lst_hexstr_crc16[1] + lst_hexstr_crc16[0]
-        
+        sendmsg = sendmsg.replace(" ", "")        
         self.TestLogger.info("Sending command:" + sendmsg) 
         
         reply = self.sercon.fnSendandCheck(sendmsg)
-        self.TestLogger.info("Received the following:")
-        self.TestLogger.info(reply)
-        self.testcontroller.fnTestBool(dictFanInfo['testcase'][3], len(reply) > 0) 
+        self.TestLogger.info("Received the following:{}".format(reply))
+        self.testcontroller.fnTestBool(dictFanInfo['testcase'][3], len(reply) == len(sendmsg)) 
         ###############
         
         self.TestLogger.info("Load new setting and reset...")             
@@ -335,13 +347,12 @@ class TestScript(QThread):
         lst_hexstr_crc16 = self.fnGetModbudCRC(msg)
         #In Modbus... the LSB is sent first 
         sendmsg = msg + ' ' + lst_hexstr_crc16[1] + lst_hexstr_crc16[0]
-        
+        sendmsg = sendmsg.replace(" ", "")        
         self.TestLogger.info("Sending command:" + sendmsg)
         
         reply = self.sercon.fnSendandCheck(sendmsg)
-        self.TestLogger.info("Received the following:")
-        self.TestLogger.info(reply)
-        self.testcontroller.fnTestBool(dictFanInfo['testcase'][4], len(reply) > 0)        
+        self.TestLogger.info("Received the following:{}".format(reply))
+        self.testcontroller.fnTestBool(dictFanInfo['testcase'][4], len(reply) == len(sendmsg))        
         
         time.sleep(1)
 
@@ -356,12 +367,11 @@ class TestScript(QThread):
         lst_hexstr_crc16 = self.fnGetModbudCRC(msg)
         #In Modbus... the LSB is sent first 
         sendmsg = msg + ' ' + lst_hexstr_crc16[1] + lst_hexstr_crc16[0]
-        
+        sendmsg = sendmsg.replace(" ", "")        
         self.TestLogger.info("Sending command:" + sendmsg)
         
         reply = self.sercon.fnSendandCheck(sendmsg)
-        self.TestLogger.info("Received the following:")
-        self.TestLogger.info(reply)
+        self.TestLogger.info("Received the following:{}".format(reply))
         self.testcontroller.fnTestBool(dictFanInfo['testcase'][5], reply[6:10] == "0000")        
         
         time.sleep(1)        
