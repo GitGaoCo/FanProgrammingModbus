@@ -177,7 +177,7 @@ class COMCfgDialog(QDialog):
         
     def fnSaveCurrentSettings(self):
         self.settings.setValue("fan/mb_comm",  self.FanMBPortLineEdit.text())
-        
+        self.close()
 
     def closeEvent(self, event):
         if self.fnValidSavedCommSettings():
