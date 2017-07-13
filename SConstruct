@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright (c) 2016 Schneider Electric Solar Inverters USA, Inc.  
+# Copyright (c) 2017 Schneider Electric Solar Inverters USA, Inc.  
 # 
 # No part of this document may be reproduced in any form or disclosed to third 
 # parties without the express written consent of: 
@@ -9,8 +9,8 @@
 #     SConstruct
 #
 # PURPOSE:
-#   Used to build the SE1 Field Terminal Board Tester program used to generate 
-#   the file used to program the EEPROM on the SE1 ICB and SCB.
+#   Used to build the program to program the SE1 fans.
+#   
 #      
 #    
 # NOTES:
@@ -35,9 +35,12 @@ import fileinput
 GUISOURCEFILE = 'SE1FanProgrammer.pyw'
 SOURCEFILES = Glob('*.py')
 SOURCEFILES += Glob('*.pyw')
+#PyInstaller Spec File
 SPECFILE = 'SE1FanProgrammer.spec'
 
+#Version Reg-ex Patterns
 SRC_PATTERN = re.compile('(^__version__\s=\s")([x\d].[x\d].[x\d]+)(")')
+VER_PATTERN = re.compile('([x\d].[x\d].[x\d]+)')
 
 # Inno installer stuff...
 ISSFILE = 'SE1FanProgrammer.iss'
@@ -54,7 +57,6 @@ elif os.path.exists(INNO_TEST_LOCATION_2):
 elif not INNO_LOCATION:
     raise Exception, "Inno Setup was not found on system"
 
-VER_PATTERN = re.compile('([x\d].[x\d].[x\d]+)')
 ################################################################################
 #                    General Purpose Function Definitions                      #
 ################################################################################
@@ -90,10 +92,6 @@ vars.Add('SWVERSION', 'Sets the version in the form of x.x.x', 'x.x.x')
 #Create environment
 env = Environment(variables = vars)
 Help(vars.GenerateHelpText(env))
-#env.AppendENVPath('PATH', r'C:/Python27/Lib/site-packages/PyQt4/bin')
-
-# Add in the custom builders
-#env.Append(BUILDERS = {'Exe' : exebuilder})
 
 print 'Building Software Version:' + env['SWVERSION']
 fnVersionFormatValid(env['SWVERSION'])
@@ -104,7 +102,7 @@ fnReplaceVersionInLine( GUISOURCEFILE, SRC_PATTERN, env['SWVERSION'])
     
 #Building the program
 gui_depends = (SOURCEFILES, GUISOURCEFILE , ISSFILE, SPECFILE)
-gui_targets = ('dist/SE1FanProgrammer/SE1FanProgrammer.exe')
+gui_targets = ('dist/bms_simulator/BMS_Simulator.exe')
 gui_clean_files = [r'./dist', r'./build', r'./~', r'*.pyc']
 gui_command = env.Command( gui_targets, gui_depends, 'C:\Python27\Scripts\pyinstaller.exe --noconfirm {}'.format(SPECFILE) )
 env.Clean(gui_command , gui_clean_files)
