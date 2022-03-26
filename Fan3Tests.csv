@@ -1,0 +1,8 @@
+TCID,Min,Max,Descript,Type,Prop,Meas,Result
+BL603_0,0,0,Fan Serial Number,Info,SerN,,,
+BL603_1,1,1,Set address to 13,Test,Bool,,
+BL603_2,1,1,Apply new configurations,Test,Bool,,
+BL603_3,1,1,Set to 485 control,Test,Bool,,
+BL603_4,1,1,Set speed control to closed loop,Test,Bool,,
+BL603_5,1,1,Apply new configurations,Test,Bool,,
+BL603_6,1,1,Confirm speed control set to closed loop,Test,Bool,,

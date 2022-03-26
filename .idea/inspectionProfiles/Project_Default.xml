@@ -1,0 +1,18 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="pydev" />
+          <option value="pyechotest" />
+          <option value="pyota" />
+          <option value="pysensor" />
+          <option value="pywireless" />
+          <option value="fbpyota" />
+          <option value="tests.T02.test_conf" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

@@ -1,0 +1,8 @@
+TCID,Min,Max,Descript,Type,Prop,Meas,Result
+BL602_0,0,0,Fan Serial Number,Info,SerN,,,
+BL602_1,1,1,Set address to 12,Test,Bool,,
+BL602_2,1,1,Apply new configurations,Test,Bool,,
+BL602_3,1,1,Set to 485 control,Test,Bool,,
+BL602_4,1,1,Set speed control to closed loop,Test,Bool,,
+BL602_5,1,1,Apply new configurations,Test,Bool,,
+BL602_6,1,1,Confirm speed control set to closed loop,Test,Bool,,

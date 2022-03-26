@@ -1,0 +1,13 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+
+<file alias="fan.ico">fan.ico</file>
+<file alias="help.ico">help.ico</file>
+<file alias="book.ico">book.ico</file>
+<file alias="close.ico">close.ico</file>
+<file alias="serial.ico">serial.ico</file>
+<file alias="save.ico">save.ico</file>
+<file alias="openbook.ico">openbook.ico</file>
+
+</qresource>
+</RCC>
